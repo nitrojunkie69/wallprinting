@@ -3,52 +3,577 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallprinting Demo</title>
+    <meta name="theme-color" content="#f4f5ef">
+    <meta name="description" content="Egyedi grafika közvetlenül a falra nyomtatva. Falnyomtatás otthonokba, irodákba és üzleti terekbe.">
+    <title>Falnyomat — Grafika közvetlenül a faladra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --paper: #f4f5ef;
+            --white: #fff;
+            --ink: #202620;
+            --muted: #687067;
+            --line: #dfe2d9;
+            --lime: #d7ff62;
+            --lime-dark: #bce53c;
+            --coral: #f06f53;
+            --forest: #25352d;
+            --serif: Georgia, 'Times New Roman', serif;
+            --sans: 'DM Sans', sans-serif;
+            --display: 'Manrope', sans-serif;
+            --page: 1240px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: 92px; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-        }
-        .container {
-            background-color: #1e293b;
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            text-align: center;
-            max-width: 500px;
-            border: 1px solid #334155;
-        }
-        h1 {
-            color: #38bdf8;
-            margin-bottom: 0.5rem;
-        }
-        p {
-            color: #94a3b8;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--sans);
+            font-size: 16px;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
-        .badge {
-            display: inline-block;
-            background-color: #0284c7;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            margin-top: 1rem;
-            font-weight: bold;
+        body, button, input, select, textarea { font-family: var(--sans); }
+        img { display: block; width: 100%; }
+        a { color: inherit; text-decoration: none; }
+        button, input, select, textarea { font: inherit; }
+        button, a { -webkit-tap-highlight-color: transparent; }
+        ::selection { background: var(--lime); color: var(--ink); }
+        .wrap { width: min(var(--page), calc(100% - 64px)); margin-inline: auto; }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 18px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+        .eyebrow::before { width: 7px; height: 7px; border-radius: 50%; background: var(--coral); content: ''; }
+        .section-title {
+            max-width: 740px;
+            margin: 0;
+            font-family: var(--display);
+            font-size: 52px;
+            font-weight: 600;
+            line-height: 1.08;
+            letter-spacing: 0;
+        }
+        .section-copy { max-width: 540px; color: var(--muted); }
+        .button {
+            display: inline-flex;
+            min-height: 54px;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 0 22px;
+            border: 1px solid var(--ink);
+            background: var(--ink);
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 700;
+            transition: background .2s ease, color .2s ease, transform .2s ease;
+        }
+        .button:hover { transform: translateY(-2px); background: var(--lime); color: var(--ink); }
+        .button .arrow { font-size: 18px; line-height: 1; }
+        .button-light { border-color: var(--line); background: transparent; color: var(--ink); }
+        .button-light:hover { border-color: var(--lime); }
+
+        .site-header {
+            position: sticky;
+            z-index: 20;
+            top: 0;
+            border-bottom: 1px solid rgba(32, 38, 32, .09);
+            background: rgba(244, 245, 239, .94);
+            backdrop-filter: blur(14px);
+        }
+        .nav { display: flex; min-height: 78px; align-items: center; justify-content: space-between; gap: 30px; }
+        .brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--display); font-size: 19px; font-weight: 800; }
+        .brand-mark { display: grid; width: 29px; height: 29px; place-items: center; background: var(--lime); font-size: 15px; }
+        .brand span:last-child { color: var(--muted); font-weight: 500; }
+        .nav-links { display: flex; align-items: center; gap: 32px; margin-left: auto; }
+        .nav-links a { color: #4e564e; font-size: 13px; font-weight: 600; transition: color .2s; }
+        .nav-links a:hover { color: var(--ink); }
+        .nav-cta { min-height: 44px; padding-inline: 17px; font-size: 12px; }
+        .menu-toggle { display: none; width: 44px; height: 44px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+
+        .hero { padding: 54px 0 80px; }
+        .hero-grid { display: grid; grid-template-columns: .92fr 1.08fr; align-items: center; gap: 68px; }
+        .hero-copy { padding: 12px 0 28px; }
+        .hero h1 {
+            max-width: 620px;
+            margin: 0;
+            font-family: var(--display);
+            font-size: 72px;
+            font-weight: 600;
+            line-height: .99;
+            letter-spacing: 0;
+        }
+        .hero h1 em { position: relative; z-index: 0; font-family: var(--serif); font-weight: 400; }
+        .hero h1 em::after { position: absolute; z-index: -1; right: -4px; bottom: 4px; left: -4px; height: 20px; background: var(--lime); content: ''; }
+        .hero-lede { max-width: 430px; margin: 24px 0 28px; color: var(--muted); font-size: 17px; }
+        .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+        .hero-aside { display: flex; align-items: center; gap: 13px; margin-top: 36px; color: var(--muted); font-size: 12px; }
+        .avatar-stack { display: flex; padding-left: 7px; }
+        .avatar-stack span { display: grid; width: 28px; height: 28px; margin-left: -7px; place-items: center; border: 2px solid var(--paper); border-radius: 50%; background: #e6ad86; color: var(--ink); font-size: 10px; font-weight: 700; }
+        .avatar-stack span:nth-child(2) { background: #9fb8a0; }
+        .avatar-stack span:nth-child(3) { background: #f3c558; }
+        .hero-visual { position: relative; min-height: 520px; }
+        .hero-photo { position: absolute; inset: 0 0 24px 24px; overflow: hidden; background: #d9ded7; }
+        .hero-photo img { height: 100%; object-fit: cover; object-position: center; }
+        .photo-label { position: absolute; right: 16px; bottom: 40px; padding: 7px 11px; background: rgba(255,255,255,.88); color: var(--ink); font-size: 10px; font-weight: 600; }
+        .hero-stamp {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            display: grid;
+            width: 146px;
+            height: 146px;
+            align-content: center;
+            justify-items: center;
+            border: 9px solid var(--paper);
+            border-radius: 50%;
+            background: var(--lime);
+            color: var(--ink);
+            text-align: center;
+            transform: rotate(-8deg);
+        }
+        .hero-stamp strong { font-family: var(--display); font-size: 28px; line-height: 1; }
+        .hero-stamp span { max-width: 90px; margin-top: 6px; font-size: 10px; font-weight: 700; line-height: 1.2; text-transform: uppercase; }
+        .hero-index { position: absolute; top: 0; right: -24px; writing-mode: vertical-rl; color: var(--muted); font-size: 10px; letter-spacing: 0; }
+        .hero-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 54px; padding-top: 19px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+        .hero-bottom strong { color: var(--ink); font-weight: 700; }
+        .hero-bottom span:last-child { text-align: right; }
+
+        .intro-band { padding: 20px 0; background: var(--lime); }
+        .intro-band-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .intro-band p { margin: 0; font-family: var(--display); font-size: 17px; font-weight: 700; }
+        .intro-band span { font-size: 12px; font-weight: 600; }
+
+        .solutions { padding: 112px 0 120px; }
+        .section-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 48px; }
+        .section-head .section-copy { margin: 0 0 4px; }
+        .solution-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+        .solution { min-height: 228px; padding: 26px 24px 25px 0; }
+        .solution + .solution { padding-left: 24px; border-left: 1px solid var(--line); }
+        .solution-number { color: var(--coral); font-family: var(--display); font-size: 12px; font-weight: 700; }
+        .solution h3 { margin: 42px 0 8px; font-family: var(--display); font-size: 19px; font-weight: 700; }
+        .solution p { max-width: 245px; margin: 0; color: var(--muted); font-size: 13px; }
+
+        .gallery { padding: 100px 0 112px; background: var(--forest); color: var(--white); }
+        .gallery .eyebrow, .gallery .section-copy { color: #c0c9c0; }
+        .gallery .eyebrow::before { background: var(--lime); }
+        .gallery .section-head { align-items: end; }
+        .gallery-grid { display: grid; grid-template-columns: 1.12fr .88fr 1fr; gap: 16px; align-items: start; }
+        .work { position: relative; min-width: 0; overflow: hidden; background: #35463b; }
+        .work:nth-child(2) { margin-top: 54px; }
+        .work:nth-child(3) { margin-top: 108px; }
+        .work img { height: 360px; object-fit: cover; transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+        .work:hover img { transform: scale(1.035); }
+        .work:nth-child(2) img { height: 306px; }
+        .work:nth-child(3) img { height: 340px; }
+        .work-caption { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 2px; }
+        .work-caption strong { font-family: var(--display); font-size: 15px; font-weight: 600; }
+        .work-caption span { color: #c0c9c0; font-size: 10px; }
+        .gallery-note { margin: 26px 0 0; color: #c0c9c0; font-size: 11px; }
+
+        .why { padding: 114px 0 118px; }
+        .why-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 100px; align-items: start; }
+        .why-intro { position: sticky; top: 122px; }
+        .why-intro .section-title { max-width: 480px; }
+        .why-intro .section-copy { margin: 20px 0 28px; }
+        .why-list { border-top: 1px solid var(--line); }
+        .why-item { display: grid; grid-template-columns: 52px 1fr; gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+        .why-icon { display: grid; width: 42px; height: 42px; place-items: center; background: var(--lime); font-family: var(--display); font-size: 16px; font-weight: 700; }
+        .why-item h3 { margin: 0 0 5px; font-family: var(--display); font-size: 18px; font-weight: 700; }
+        .why-item p { max-width: 470px; margin: 0; color: var(--muted); font-size: 13px; }
+
+        .surfaces { padding: 92px 0 98px; background: #e9ece4; }
+        .surface-layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 80px; align-items: center; }
+        .surface-layout .section-title { max-width: 490px; }
+        .surface-layout .section-copy { margin: 18px 0 26px; }
+        .surface-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid #cdd2c8; }
+        .surface-list span { padding: 13px 0; border-bottom: 1px solid #cdd2c8; font-size: 14px; font-weight: 600; }
+        .surface-list span:nth-child(odd) { margin-right: 24px; }
+        .surface-note { margin-top: 18px; color: var(--muted); font-size: 11px; }
+        .surface-photo { position: relative; height: 440px; }
+        .surface-photo img { height: 100%; object-fit: cover; }
+        .surface-photo-label { position: absolute; right: 0; bottom: 0; padding: 12px 15px; background: var(--lime); color: var(--ink); font-size: 11px; font-weight: 700; }
+
+        .process { padding: 114px 0 120px; }
+        .process .section-head { margin-bottom: 58px; }
+        .steps { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+        .step { padding: 24px 28px 0 0; }
+        .step + .step { padding-left: 28px; border-left: 1px solid var(--line); }
+        .step-index { display: flex; align-items: center; gap: 11px; color: var(--muted); font-size: 11px; font-weight: 700; }
+        .step-index::before { width: 8px; height: 8px; background: var(--coral); content: ''; }
+        .step h3 { margin: 34px 0 9px; font-family: var(--display); font-size: 23px; font-weight: 700; }
+        .step p { max-width: 320px; margin: 0; color: var(--muted); font-size: 14px; }
+
+        .quote-band { padding: 74px 0; background: var(--coral); color: var(--ink); }
+        .quote-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+        .quote-inner p { max-width: 710px; margin: 0; font-family: var(--display); font-size: 34px; font-weight: 600; line-height: 1.2; }
+        .quote-mark { flex: 0 0 auto; font-family: var(--serif); font-size: 100px; line-height: .7; }
+
+        .faq { padding: 112px 0 120px; }
+        .faq-grid { display: grid; grid-template-columns: .75fr 1.25fr; gap: 100px; }
+        .faq .section-title { max-width: 400px; }
+        .faq .section-copy { margin: 19px 0 0; }
+        .faq-list { border-top: 1px solid var(--line); }
+        .faq-list details { border-bottom: 1px solid var(--line); }
+        .faq-list summary { position: relative; padding: 20px 38px 20px 0; cursor: pointer; list-style: none; font-family: var(--display); font-size: 15px; font-weight: 700; }
+        .faq-list summary::-webkit-details-marker { display: none; }
+        .faq-list summary::after { position: absolute; top: 18px; right: 2px; content: '+'; font-family: var(--sans); font-size: 24px; font-weight: 400; }
+        .faq-list details[open] summary::after { content: '−'; }
+        .faq-list details p { max-width: 620px; margin: -3px 30px 20px 0; color: var(--muted); font-size: 13px; }
+
+        .contact { padding: 92px 0 98px; background: var(--lime); }
+        .contact-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 96px; align-items: start; }
+        .contact .eyebrow { color: #4b5a33; }
+        .contact .eyebrow::before { background: var(--coral); }
+        .contact .section-title { max-width: 500px; }
+        .contact-copy { max-width: 400px; margin: 18px 0 30px; color: #4b5740; }
+        .contact-prompt { display: flex; align-items: center; gap: 12px; padding-top: 20px; border-top: 1px solid rgba(32,38,32,.2); color: #4b5740; font-size: 12px; }
+        .contact-prompt strong { color: var(--ink); }
+        .contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; padding: 26px; background: var(--white); }
+        .field { display: grid; gap: 7px; }
+        .field-wide { grid-column: 1 / -1; }
+        .field label { font-size: 11px; font-weight: 700; }
+        .field input, .field select, .field textarea { width: 100%; min-height: 46px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 0; outline: none; background: #fbfcf9; color: var(--ink); font-size: 13px; }
+        .field textarea { min-height: 104px; resize: vertical; }
+        .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--ink); }
+        .form-bottom { display: flex; grid-column: 1 / -1; align-items: center; justify-content: space-between; gap: 16px; }
+        .form-bottom small { max-width: 210px; color: var(--muted); font-size: 10px; line-height: 1.4; }
+        .contact-form .button { min-height: 48px; padding-inline: 15px; font-size: 12px; }
+        .form-status { display: none; grid-column: 1 / -1; margin: 0; padding: 11px 13px; background: #eff5e4; color: var(--ink); font-size: 12px; }
+        .form-status.is-visible { display: block; }
+
+        .site-footer { padding: 30px 0; background: var(--forest); color: var(--white); }
+        .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+        .site-footer .brand span:last-child { color: #b6c0b6; }
+        .footer-note, .footer-links { color: #b6c0b6; font-size: 11px; }
+        .footer-links { display: flex; gap: 20px; }
+        .footer-links a:hover { color: var(--lime); }
+
+        .reveal { animation: rise-in .7s both; }
+        .reveal-delay { animation-delay: .14s; }
+        @keyframes rise-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
+        @media (max-width: 1000px) {
+            .wrap { width: min(var(--page), calc(100% - 48px)); }
+            .hero-grid { gap: 42px; }
+            .hero h1 { font-size: 62px; }
+            .hero-visual { min-height: 460px; }
+            .section-title { font-size: 46px; }
+            .why-grid, .faq-grid, .contact-grid { gap: 58px; }
+        }
+        @media (max-width: 760px) {
+            html { scroll-padding-top: 74px; }
+            .wrap { width: calc(100% - 40px); }
+            .nav { min-height: 68px; gap: 12px; }
+            .nav-links { position: absolute; top: 68px; right: 0; left: 0; display: none; align-items: stretch; gap: 0; padding: 8px 20px 18px; border-bottom: 1px solid var(--line); background: var(--paper); }
+            .nav-links.is-open { display: flex; flex-direction: column; }
+            .nav-links a { padding: 12px 0; border-bottom: 1px solid var(--line); }
+            .nav-cta { display: none; }
+            .menu-toggle { display: grid; place-items: center; font-size: 20px; }
+            .hero { padding: 40px 0 54px; }
+            .hero-grid { grid-template-columns: 1fr; gap: 30px; }
+            .hero-copy { padding: 0; }
+            .hero h1 { max-width: 530px; font-size: 58px; }
+            .hero-lede { margin: 19px 0 23px; font-size: 15px; }
+            .hero-aside { margin-top: 25px; }
+            .hero-visual { min-height: 430px; margin-right: 12px; }
+            .hero-photo { inset: 0 0 18px 18px; }
+            .hero-stamp { width: 122px; height: 122px; border-width: 7px; }
+            .hero-stamp strong { font-size: 24px; }
+            .hero-index { right: -15px; }
+            .hero-bottom { margin-top: 36px; }
+            .intro-band-inner { align-items: flex-start; flex-direction: column; gap: 4px; }
+            .intro-band p { font-size: 15px; }
+            .solutions, .why, .process, .faq { padding: 78px 0; }
+            .section-title { font-size: 40px; }
+            .section-head { align-items: flex-start; flex-direction: column; gap: 14px; margin-bottom: 32px; }
+            .solution-grid { grid-template-columns: 1fr 1fr; }
+            .solution { min-height: 205px; padding: 20px 15px 20px 0; }
+            .solution + .solution { padding-left: 15px; }
+            .solution:nth-child(3) { padding-left: 0; border-top: 1px solid var(--line); border-left: 0; }
+            .solution:nth-child(4) { border-top: 1px solid var(--line); }
+            .solution h3 { margin-top: 29px; font-size: 17px; }
+            .gallery { padding: 78px 0 82px; }
+            .gallery-grid { grid-template-columns: 1fr 1fr; gap: 13px; }
+            .work:nth-child(2) { margin-top: 34px; }
+            .work:nth-child(3) { grid-column: 1 / -1; width: 75%; margin: 0 auto; }
+            .work img, .work:nth-child(2) img, .work:nth-child(3) img { height: 250px; }
+            .work:nth-child(3) img { height: 280px; }
+            .work-caption { align-items: flex-start; flex-direction: column; gap: 2px; padding: 11px 1px; }
+            .why-grid, .faq-grid, .contact-grid, .surface-layout { grid-template-columns: 1fr; gap: 42px; }
+            .why-intro { position: static; }
+            .why-item { grid-template-columns: 44px 1fr; gap: 12px; padding: 20px 0; }
+            .why-icon { width: 38px; height: 38px; }
+            .surfaces { padding: 76px 0; }
+            .surface-layout { gap: 30px; }
+            .surface-photo { height: 360px; }
+            .surface-list span { font-size: 13px; }
+            .process .section-head { margin-bottom: 34px; }
+            .steps { grid-template-columns: 1fr; }
+            .step, .step + .step { padding: 22px 0; border-bottom: 1px solid var(--line); border-left: 0; }
+            .step h3 { margin: 18px 0 6px; font-size: 21px; }
+            .quote-band { padding: 52px 0; }
+            .quote-inner { align-items: flex-start; gap: 12px; }
+            .quote-inner p { font-size: 25px; }
+            .quote-mark { font-size: 65px; }
+            .faq-grid { gap: 30px; }
+            .contact { padding: 76px 0; }
+            .contact-grid { gap: 35px; }
+            .contact-form { gap: 15px 11px; padding: 19px; }
+            .footer-inner { align-items: flex-start; flex-direction: column; gap: 14px; }
+        }
+        @media (max-width: 420px) {
+            .wrap { width: calc(100% - 32px); }
+            .hero h1 { font-size: 49px; }
+            .hero-visual { min-height: 345px; }
+            .hero-stamp { width: 108px; height: 108px; }
+            .hero-bottom { align-items: flex-start; gap: 15px; font-size: 10px; }
+            .button { min-height: 50px; padding-inline: 16px; font-size: 12px; }
+            .section-title { font-size: 35px; }
+            .solution { min-height: 220px; }
+            .work img, .work:nth-child(2) img { height: 190px; }
+            .work:nth-child(3) img { height: 230px; }
+            .work-caption strong { font-size: 13px; }
+            .contact-form { grid-template-columns: 1fr; }
+            .field-wide, .form-bottom, .form-status { grid-column: 1; }
+            .form-bottom { align-items: flex-start; flex-direction: column; }
+            .form-bottom small { max-width: none; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Wallprinting Projekt</h1>
-        <p>A weboldal sikeresen fut a GitHub Pages hálózatán!</p>
-        <span class="badge">Live Demo</span>
-    </div>
+    <header class="site-header">
+        <nav class="nav wrap" aria-label="Fő navigáció">
+            <a class="brand" href="#kezdo" aria-label="Falnyomat, főoldal"><span class="brand-mark" aria-hidden="true">f.</span><span>falnyomat</span></a>
+            <div class="nav-links" id="nav-links">
+                <a href="#megoldasok">Megoldások</a>
+                <a href="#inspiracio">Inspiráció</a>
+                <a href="#folyamat">Hogyan működik?</a>
+                <a href="#gyik">GYIK</a>
+            </div>
+            <a class="button nav-cta" href="#ajanlat">Ajánlatot kérek <span class="arrow" aria-hidden="true">↗</span></a>
+            <button class="menu-toggle" type="button" aria-label="Navigáció megnyitása" aria-expanded="false" aria-controls="nav-links">☰</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero wrap" id="kezdo">
+            <div class="hero-grid">
+                <div class="hero-copy reveal">
+                    <p class="eyebrow">Egyedi falnyomtatás</p>
+                    <h1>A tér, ami <em>rólad</em> mesél.</h1>
+                    <p class="hero-lede">Saját grafika, fotó vagy logó – közvetlenül a falra nyomtatva. Egyedi karakter otthonoknak, irodáknak és üzleti tereknek.</p>
+                    <div class="hero-actions">
+                        <a class="button" href="#ajanlat">Mesélj az ötletedről <span class="arrow" aria-hidden="true">↗</span></a>
+                        <a class="button button-light" href="#inspiracio">Inspirációk <span class="arrow" aria-hidden="true">↓</span></a>
+                    </div>
+                    <div class="hero-aside">
+                        <div class="avatar-stack" aria-hidden="true"><span>+</span><span>+</span><span>+</span></div>
+                        <span>A te falad. A te történeted. A te grafikád.</span>
+                    </div>
+                </div>
+                <div class="hero-visual reveal reveal-delay">
+                    <div class="hero-photo">
+                        <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&amp;fit=crop&amp;w=1400&amp;q=85" alt="Világos, modern nappali nagy falfelülettel" fetchpriority="high">
+                    </div>
+                    <span class="photo-label">Hangulatkép · Unsplash</span>
+                    <div class="hero-stamp"><strong>1:1</strong><span>közvetlenül a falra</span></div>
+                    <span class="hero-index">FALNYOMTATÁS · EGYEDI GRAFIKA</span>
+                </div>
+            </div>
+            <div class="hero-bottom">
+                <span><strong>Nyomtatás a falra</strong>, nem fóliára</span>
+                <span>Személyes terek · üzleti környezet · közösségi helyek</span>
+            </div>
+        </section>
+
+        <div class="intro-band">
+            <div class="intro-band-inner wrap">
+                <p>Nem kell kész tervvel érkezned.</p>
+                <span>Az ötlettől a falig, együtt gondolkodva.</span>
+            </div>
+        </div>
+
+        <section class="solutions wrap" id="megoldasok">
+            <div class="section-head">
+                <div><p class="eyebrow">Minden térnek van története</p><h2 class="section-title">Egy üres falból a hely kedvenc részlete.</h2></div>
+                <p class="section-copy">Egy apró logó, egy teljes falat betöltő kép vagy egy finom grafikai részlet. A méret és a hangulat csak rajtad múlik.</p>
+            </div>
+            <div class="solution-grid">
+                <article class="solution"><span class="solution-number">01 / Otthon</span><h3>Saját világ, saját falakon</h3><p>Karakteres nappali, személyes gyerekszoba vagy egy kép, ami minden nap hazahoz.</p></article>
+                <article class="solution"><span class="solution-number">02 / Iroda</span><h3>Arculat, amit érezni lehet</h3><p>Logók, inspiráló gondolatok és egyedi grafikák tárgyalókba, irodákba, közösségi terekbe.</p></article>
+                <article class="solution"><span class="solution-number">03 / Üzlet</span><h3>Az első benyomás a falon kezdődik</h3><p>Hangulatos részletek üzletekbe, vendéglátóhelyekre, szalonokba és szálláshelyekre.</p></article>
+                <article class="solution"><span class="solution-number">04 / Közösség</span><h3>Terek, amik összehoznak</h3><p>Játékos, tájékoztató vagy inspiráló grafikák iskolákba, stúdiókba és közösségi helyekre.</p></article>
+            </div>
+        </section>
+
+        <section class="gallery" id="inspiracio">
+            <div class="wrap">
+                <div class="section-head">
+                    <div><p class="eyebrow">Munkáink helyett, egyelőre</p><h2 class="section-title">Nézd meg, mi minden fér el egy falon.</h2></div>
+                    <p class="section-copy">Ezek hangulatot mutató stockfotók. Hamarosan ide kerülnek a saját nyomataid és a készülésüket bemutató time-lapse videók.</p>
+                </div>
+                <div class="gallery-grid">
+                    <article class="work">
+                        <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&amp;fit=crop&amp;w=1000&amp;q=82" alt="Inspiráló, növényekkel berendezett modern iroda" loading="lazy">
+                        <div class="work-caption"><strong>Iroda, saját arculattal</strong><span>Hangulatkép · Unsplash</span></div>
+                    </article>
+                    <article class="work">
+                        <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&amp;fit=crop&amp;w=900&amp;q=82" alt="Otthonos, letisztult nappali dekoratív fallal" loading="lazy">
+                        <div class="work-caption"><strong>Otthon, személyes részletekkel</strong><span>Hangulatkép · Unsplash</span></div>
+                    </article>
+                    <article class="work">
+                        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&amp;fit=crop&amp;w=1000&amp;q=82" alt="Kortárs belső tér nagy, szabadon dekorálható falfelülettel" loading="lazy">
+                        <div class="work-caption"><strong>Üzlet, emlékezetes hangulattal</strong><span>Hangulatkép · Unsplash</span></div>
+                    </article>
+                </div>
+                <p class="gallery-note">A képek illusztrációk, nem a falnyomtatóval készült referenciamunkák.</p>
+            </div>
+        </section>
+
+        <section class="why wrap">
+            <div class="why-grid">
+                <div class="why-intro">
+                    <p class="eyebrow">Miért közvetlenül a falra?</p>
+                    <h2 class="section-title">A grafika a tér része lesz.</h2>
+                    <p class="section-copy">A nyomat nem különálló fólia: a grafika közvetlenül a kiválasztott falfelületre kerül. Így az egyedi méret és az összetett részlet sem jelent akadályt.</p>
+                    <a class="button button-light" href="#ajanlat">Beszéljük át a falad <span class="arrow" aria-hidden="true">↗</span></a>
+                </div>
+                <div class="why-list">
+                    <article class="why-item"><span class="why-icon" aria-hidden="true">01</span><div><h3>Nincs illesztési csík</h3><p>A grafika közvetlenül a felületre készül, így nincs összeragasztott fóliacsík vagy felpöndörödő szél.</p></div></article>
+                    <article class="why-item"><span class="why-icon" aria-hidden="true">02</span><div><h3>Precíz részletek</h3><p>Logó, finom vonal, szöveg vagy fotó: a digitális nyomtatás a részletgazdag grafikáknak is teret ad.</p></div></article>
+                    <article class="why-item"><span class="why-icon" aria-hidden="true">03</span><div><h3>A te méretedre készül</h3><p>A terv a falad méreteihez és a tér adottságaihoz igazodik, nem kell kész méretű dekorhoz alkalmazkodnod.</p></div></article>
+                    <article class="why-item"><span class="why-icon" aria-hidden="true">04</span><div><h3>Tervezésben is segítünk</h3><p>Ha még csak egy elképzelésed van, abból is el tudunk indulni. A grafikát közösen pontosítjuk a nyomtatás előtt.</p></div></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="surfaces">
+            <div class="surface-layout wrap">
+                <div>
+                    <p class="eyebrow">A fal adja a keretet</p>
+                    <h2 class="section-title">Nem kell tökéletesen sima vászon.</h2>
+                    <p class="section-copy">Téglára, fára, betonra és festett falra is kerülhet grafika. A nyomtathatóságot minden esetben a konkrét felület állapota és anyaga alapján egyeztetjük.</p>
+                    <div class="surface-list"><span>Festett fal</span><span>Tégla</span><span>Beton</span><span>Fa</span><span>Üveg</span><span>Egyéb felületek</span></div>
+                    <p class="surface-note">Küldj egy fotót a falról, és megnézzük, alkalmas-e a nyomtatásra.</p>
+                </div>
+                <div class="surface-photo">
+                    <img src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&amp;fit=crop&amp;w=1200&amp;q=82" alt="Texturált betonfelület egy modern belső térben" loading="lazy">
+                    <span class="surface-photo-label">Minden felület egyedi. Egyeztessünk.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="process wrap" id="folyamat">
+            <div class="section-head">
+                <div><p class="eyebrow">Az első üzenettől a kész falig</p><h2 class="section-title">Három lépés, egy nagy változás.</h2></div>
+                <p class="section-copy">Előre egyeztetünk, hogy ne a helyszínen érjen meglepetés. Minden projekt az ötlet és a felület megismerésével indul.</p>
+            </div>
+            <div class="steps">
+                <article class="step"><span class="step-index">1. LÉPÉS · ÖTLET</span><h3>Megismerjük az elképzelésed</h3><p>Küldd el, mit szeretnél, mekkora a fal, és hol található. Ha tudsz, csatolj fotót a felületről és a grafikáról.</p></article>
+                <article class="step"><span class="step-index">2. LÉPÉS · TERVEZÉS</span><h3>Egyeztetjük a részleteket</h3><p>Átnézzük a falat és a grafikát, megbeszéljük a méretet, az elhelyezést, az előkészítést és a pontos árat.</p></article>
+                <article class="step"><span class="step-index">3. LÉPÉS · NYOMTATÁS</span><h3>A terv életre kel a falon</h3><p>Az előre egyeztetett időpontban a helyszínen nyomtatjuk a grafikát, közösen ellenőrizzük a végeredményt.</p></article>
+            </div>
+        </section>
+
+        <section class="quote-band">
+            <div class="quote-inner wrap"><span class="quote-mark" aria-hidden="true">“</span><p>A legjobb faldekoráció nem csak kitölti a teret. Valahogy pont olyan, mintha mindig is oda tartozott volna.</p><span class="quote-mark" aria-hidden="true">”</span></div>
+        </section>
+
+        <section class="faq wrap" id="gyik">
+            <div class="faq-grid">
+                <div><p class="eyebrow">Jó kérdések, mielőtt belevágunk</p><h2 class="section-title">Amit érdemes tudni.</h2><p class="section-copy">Minden fal és minden grafika más. Ha valami nem derül ki, kérdezz bátran az ajánlatkérésnél.</p></div>
+                <div class="faq-list">
+                    <details><summary>Milyen falra lehet nyomtatni?</summary><p>Sokféle beltéri felület szóba jöhet, például festett fal, tégla, beton vagy fa. A végső lehetőség a felület anyagától, textúrájától, tisztaságától és állapotától függ, ezért előzetes egyeztetés szükséges.</p></details>
+                    <details><summary>Milyen grafikát küldhetek?</summary><p>Logót, szöveget, illusztrációt vagy fotót is. A legjobb eredményhez nagy felbontású, jó minőségű fájl szükséges. Ha csak ötleted vagy vázlatod van, arról is beszélhetünk.</p></details>
+                    <details><summary>Mennyibe kerül a falnyomtatás?</summary><p>Az ár a nyomat méretétől, a grafikától, a felület előkészítésétől és a helyszíntől függ. Küldd el a hozzávetőleges méreteket és egy fotót a falról, ezek alapján személyre szabott ajánlatot tudunk adni.</p></details>
+                    <details><summary>Mennyi idő alatt készül el?</summary><p>A kivitelezés ideje a nyomat méretétől és a helyszíni körülményektől függ. Az időigényt az ajánlatadáskor, a részletek ismeretében egyeztetjük.</p></details>
+                    <details><summary>El kell készítenem a grafikát?</summary><p>Nem feltétlenül. Ha van kész fájlod, megnézzük, alkalmas-e nyomtatásra. Ha még csak egy elképzelésed van, egyeztetünk a lehetséges grafikai előkészítésről is.</p></details>
+                </div>
+            </div>
+        </section>
+
+        <section class="contact" id="ajanlat">
+            <div class="contact-grid wrap">
+                <div>
+                    <p class="eyebrow">Vágjunk bele</p>
+                    <h2 class="section-title">Melyik falad vár egy új történetre?</h2>
+                    <p class="contact-copy">Írd meg röviden, mit képzeltél el. Pár adat már elég az induláshoz, a részleteket közösen pontosítjuk.</p>
+                    <div class="contact-prompt"><span aria-hidden="true">↗</span><span><strong>Hasznos, ha megírod:</strong> a fal méretét, helyszínét és a grafika ötletét.</span></div>
+                </div>
+                <form class="contact-form" id="quote-form">
+                    <div class="field"><label for="name">Neved</label><input id="name" name="name" autocomplete="name" placeholder="Hogy szólíthatlak?" required></div>
+                    <div class="field"><label for="email">E-mail-címed</label><input id="email" name="email" type="email" autocomplete="email" placeholder="nev@email.hu" required></div>
+                    <div class="field"><label for="location">A munka helyszíne</label><input id="location" name="location" placeholder="Település"></div>
+                    <div class="field"><label for="space">Milyen helyiség?</label><select id="space" name="space"><option value="">Válassz egyet</option><option>Otthon</option><option>Iroda</option><option>Üzlet vagy vendéglátóhely</option><option>Közösségi tér</option><option>Egyéb</option></select></div>
+                    <div class="field field-wide"><label for="details">Mesélj a falról és az elképzelésedről</label><textarea id="details" name="details" placeholder="Körülbelüli méret, felület, grafika vagy csak egy ötlet..." required></textarea></div>
+                    <div class="form-bottom"><small>Az űrlap az e-mail alkalmazásodban készít piszkozatot. A címzett e-mail-címet küldés előtt kell majd beírnod.</small><button class="button" type="submit">Ajánlatkérés összeállítása <span class="arrow" aria-hidden="true">↗</span></button></div>
+                    <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner wrap">
+            <a class="brand" href="#kezdo"><span class="brand-mark" aria-hidden="true">f.</span><span>falnyomat</span></a>
+            <span class="footer-note">Egyedi grafika. Közvetlenül a faladra.</span>
+            <div class="footer-links"><a href="#megoldasok">Megoldások</a><a href="#gyik">GYIK</a><a href="#ajanlat">Kapcsolat</a></div>
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+
+        menuToggle.addEventListener('click', () => {
+            const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', String(!isOpen));
+            menuToggle.setAttribute('aria-label', isOpen ? 'Navigáció megnyitása' : 'Navigáció bezárása');
+            navLinks.classList.toggle('is-open', !isOpen);
+        });
+
+        navLinks.addEventListener('click', (event) => {
+            if (event.target.closest('a')) {
+                navLinks.classList.remove('is-open');
+                menuToggle.setAttribute('aria-expanded', 'false');
+                menuToggle.setAttribute('aria-label', 'Navigáció megnyitása');
+            }
+        });
+
+        document.querySelector('#quote-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const data = new FormData(form);
+            const subject = encodeURIComponent('Falnyomtatás ajánlatkérés');
+            const body = encodeURIComponent([
+                `Név: ${data.get('name')}`,
+                `E-mail: ${data.get('email')}`,
+                `Helyszín: ${data.get('location') || 'Nincs megadva'}`,
+                `Helyiség: ${data.get('space') || 'Nincs megadva'}`,
+                '',
+                'Elképzelés:',
+                data.get('details')
+            ].join('\n'));
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+            const status = document.querySelector('#form-status');
+            status.textContent = 'Az e-mail-piszkozat megnyitásához engedélyezd a levelezőalkalmazásodat. A címzett mezőbe írd be a vállalkozás e-mail-címét.';
+            status.classList.add('is-visible');
+        });
+    </script>
 </body>
 </html>
